@@ -14,8 +14,9 @@ class Director:
 
     # The algorithm for assembling a car
     def getComponent(self):
-        component = Component()
 
+        #component = Component()
+        component = self.__builder.getComponentType()
         name = self.__builder.getName()
         component.setName(name)
 
@@ -49,14 +50,79 @@ class Component:
     """
 
     def __init__(self):
+        pass
+    #    self.__name  = None
+     #   self.__gateway  = None
+      #  self.__subnetmask  = None
+       # self.__dnsserver  = None
+    #    self.__routes  = None
+     #   self.__ipaddress  = None
+      #  self.__fastethernet  = None
+
+    def setName(self, name):
+   #     self.__name = name
+        pass
+
+    def setGateway(self, gateway):
+    #    self.__gateway = gateway
+        pass
+    def setSubnetMask(self, subnetmask):
+     #   self.__subnetmask = subnetmask
+        pass
+    def setDNSServer(self, dnsserver):
+      #  self.__dnsserver = dnsserver
+        pass
+    def setRoutes(self, routes):
+       # self.__routes = routes
+        pass
+    def setIPAddress(self, ipaddress):
+        #self.__ipaddress = ipaddress
+        pass
+    def setFastEthernet(self, fastethernet):
+        #self.__fastethernet = fastethernet
+        pass
+    def specification(self):
+        pass
+       # print "name: %s" % self.__name.displayname
+        #print "gateway: %s" % self.__gateway.gateway
+      #  print "engine horsepower: %d" % self.__engine.horsepower
+       # print "tire size: %d\'" % self.__wheels[0].size
+class Router(Component):
+
+    def __init__(self):
+        self.__name  = None
+        self.__routes  = None
+        self.__fastethernet  = None
+    def specification(self):
+        print "name: %s" % self.__name.displayname
+        print "routes: %s" % self.__routes
+        print "fastethernet: %s" % self.__fastethernet
+    def setName(self, name):
+        self.__name = name
+
+    def setRoutes(self, routes):
+        self.__routes = routes
+
+    def setFastEthernet(self, fastethernet):
+        self.__fastethernet = fastethernet
+class Hub(Component):
+
+    def __init__(self):
+        self.__name  = None
+    def setName(self, name):
+        self.__name = name
+
+    def specification(self):
+        print "name: %s" % self.__name.displayname
+        
+class PC(Component):
+
+    def __init__(self):    
         self.__name  = None
         self.__gateway  = None
         self.__subnetmask  = None
         self.__dnsserver  = None
-        self.__routes  = None
         self.__ipaddress  = None
-        self.__fastethernet  = None
-
     def setName(self, name):
         self.__name = name
 
@@ -68,21 +134,17 @@ class Component:
         
     def setDNSServer(self, dnsserver):
         self.__dnsserver = dnsserver
-        
-    def setRoutes(self, routes):
-        self.__routes = routes
+
         
     def setIPAddress(self, ipaddress):
         self.__ipaddress = ipaddress
-        
-    def setFastEthernet(self, fastethernet):
-        self.__fastethernet = fastethernet
-        
+
     def specification(self):
         print "name: %s" % self.__name.displayname
-        print "gateway: %s" % self.__gateway.gateway
-      #  print "engine horsepower: %d" % self.__engine.horsepower
-       # print "tire size: %d\'" % self.__wheels[0].size
+        print "gateway: %s" % self.__gateway
+        print "subnetmask: %s" % self.__subnetmask
+        print "dnsserver: %s" % self.__dnsserver
+        print "ipaddress: %s" % self.__ipaddress
 
 
 class Builder:
@@ -93,6 +155,7 @@ class Builder:
     """
 
     def getName(self): pass
+    def getComponentType(self): pass
     def getGateway(self): pass
     def getIPAddress(self): pass
     def getSubnetMask(self): pass
@@ -105,6 +168,8 @@ class HubBuilder(Builder):
     """ Concrete Builder implementation.
     This class builds parts for Jeep's SUVs.
     """
+    def getComponentType(self):
+        return Hub()
 
     def getName(self):
         name = Name()
@@ -116,7 +181,8 @@ class PCBuilder(Builder):
     """ Concrete Builder implementation.
     This class builds parts for Jeep's SUVs.
     """
-
+    def getComponentType(self):
+        return PC()
     def getGateway(self):
         gw = Gateway()
         gw.gateway = 'gwaddr'
@@ -145,6 +211,8 @@ class RouterBuilder(Builder):
     """ Concrete Builder implementation.
     This class builds parts for Nissan's family cars.
     """
+    def getComponentType(self):
+        return Router()
 
     def getName(self):
         name = Name()
@@ -152,7 +220,8 @@ class RouterBuilder(Builder):
         return name
 
     def getRoutes(self):
-        routes = Routes()
+        num = 3 #make it user defined
+        routes = [Routes() for i in range(0,num)]
         routes.network = 'nwaddr'
         routes.maskk = 'maskaddr'
         routes.nexthop = 'nxthopaddr'
@@ -160,35 +229,37 @@ class RouterBuilder(Builder):
 
     def getFastEthernet(self):
 #4 ethernets, each has mac, ip address, subnet mask
-        fastEthernet = FastEthernet()
-        fastEthernet.mac = "macaddr"
-        fastEthernet.iPaddress.ipaddress = "ipaddr"
-        fastEthernet.subneTmask.subnetmask = "smaddr"
+        fastEthernet = [FastEthernet() for i in range(0,4)]
+        fastEthernet[0].mac = "macaddr"
+        fastEthernet[0].iPaddress.ipaddress = "ipaddr"
+        fastEthernet[0].subneTmask.subnetmask = "smaddr"
         return fastEthernet
 
 # Car parts
 class IPAddress:
     ipaddress = None
 class SubnetMask:
-    subnetmask = None
+    subnetmask = IPAddress()
 class Name:
     displayname = None
 
 class Routes:
-    network = None
-    mask = None
-    nexthop = None
+    network = Network()
+    mask = SubnetMask()
+    nexthop = Gateway()
 
 class FastEthernet:
     mac = None
     iPaddress = IPAddress()
     subneTmask = SubnetMask()
-
+class Network()
+    network = IPAddress()
 class DNSServer:
     dnsserver = None
 class Gateway:
-    gateway = None
-
+    gateway = IPAddress()
+class fourPartAddress:
+    pass
 
 
 def main():
