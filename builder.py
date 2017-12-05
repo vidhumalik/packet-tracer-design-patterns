@@ -13,29 +13,29 @@ class Director:
         self.__builder = builder
 
     # The algorithm for assembling a car
-    def getComponent(self):
-
+    def getComponent(self, name = None, gateway = None,ipaddress = None,subnetmask = None,dnsserver = None,routes = None,fastethernet = None ):
+        print(name,gateway, ipaddress, subnetmask, dnsserver, routes, fastethernet)
         #component = Component()
         component = self.__builder.getComponentType()
-        name = self.__builder.getName()
+        #name = self.__builder.getName()
         component.setName(name)
 
-        gateway = self.__builder.getGateway()
+       # gateway = self.__builder.getGateway()
         component.setGateway(gateway)
 
-        ipaddress = self.__builder.getIPAddress()
+       # ipaddress = self.__builder.getIPAddress()
         component.setIPAddress(ipaddress)
 
-        subnetmask = self.__builder.getSubnetMask()
+       # subnetmask = self.__builder.getSubnetMask()
         component.setSubnetMask(subnetmask)
 
-        dnsserver = self.__builder.getDNSServer()
+       # dnsserver = self.__builder.getDNSServer()
         component.setDNSServer(dnsserver)
 
-        routes = self.__builder.getRoutes()
+       # routes = self.__builder.getRoutes()
         component.setRoutes(routes)
 
-        fastethernet = self.__builder.getFastEthernet()
+      #  fastethernet = self.__builder.getFastEthernet()
         component.setFastEthernet(fastethernet)
 
         return component
@@ -94,7 +94,7 @@ class Router(Component):
         self.__routes  = None
         self.__fastethernet  = None
     def specification(self):
-        print "name: %s" % self.__name.displayname
+        print "name: %s" % self.__name
         print "routes: %s" % self.__routes
         print "fastethernet: %s" % self.__fastethernet
     def setName(self, name):
@@ -113,7 +113,7 @@ class Hub(Component):
         self.__name = name
 
     def specification(self):
-        print "name: %s" % self.__name.displayname
+        print "name: %s" % self.__name
         
 class PC(Component):
 
@@ -140,7 +140,7 @@ class PC(Component):
         self.__ipaddress = ipaddress
 
     def specification(self):
-        print "name: %s" % self.__name.displayname
+        print "name: %s" % self.__name
         print "gateway: %s" % self.__gateway
         print "subnetmask: %s" % self.__subnetmask
         print "dnsserver: %s" % self.__dnsserver
@@ -222,9 +222,9 @@ class RouterBuilder(Builder):
     def getRoutes(self):
         num = 3 #make it user defined
         routes = [Routes() for i in range(0,num)]
-        routes.network = 'nwaddr'
-        routes.maskk = 'maskaddr'
-        routes.nexthop = 'nxthopaddr'
+        routes[0].network.network = 'nwaddr'
+        routes[0].mask.subnetmask = 'maskaddr'
+        routes[0].nexthop.gateway.ipaddress = 'nxthopaddr'
         return routes #put network mask nexthop within it
 
     def getFastEthernet(self):
@@ -243,6 +243,10 @@ class SubnetMask:
 class Name:
     displayname = None
 
+class Gateway:
+    gateway = IPAddress()
+class Network:
+    network = IPAddress()
 class Routes:
     network = Network()
     mask = SubnetMask()
@@ -252,12 +256,8 @@ class FastEthernet:
     mac = None
     iPaddress = IPAddress()
     subneTmask = SubnetMask()
-class Network()
-    network = IPAddress()
 class DNSServer:
     dnsserver = None
-class Gateway:
-    gateway = IPAddress()
 class fourPartAddress:
     pass
 
@@ -271,21 +271,21 @@ def main():
 
     print "Router"
     director.setBuilder(routerBuilder)
-    router = director.getComponent()
+    router = director.getComponent(gateway='testgateway', name = 'testnamerouter')
     router.specification()
 
     print ""
 
     print "PC"
     director.setBuilder(pcBuilder)
-    pc = director.getComponent()
+    pc = director.getComponent(name = 'testnamepc')
     pc.specification()
 
     print ""
 
     print "Hub"
     director.setBuilder(hubBuilder)
-    hub = director.getComponent()
+    hub = director.getComponent(name = 'testnamehub')
     hub.specification()
 
 if __name__ == "__main__":
