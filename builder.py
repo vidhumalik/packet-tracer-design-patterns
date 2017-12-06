@@ -1,6 +1,6 @@
-import flyweight
+#import flyweight
 
-flyweightFactory = FlyweightFactory()
+#flyweightFactory = FlyweightFactory()
 
 class Director:
     
@@ -16,34 +16,34 @@ class Director:
         self.__builder = builder
 
     # The algorithm for assembling a car
-    def getComponent(self, name = None, gateway = None,ipaddress = None,subnetmask = None,dnsserver = None,routes = None,fastethernet = None ):
-        print(name,gateway, ipaddress, subnetmask, dnsserver, routes, fastethernet)
+    def createComponent(self, name = None, gateway = None,ipaddress = None,subnetmask = None,dnsserver = None,network = None, nexthop = None, mac = None ):
+        print(name,gateway, ipaddress, subnetmask, dnsserver, network, nexthop, mac )
         #component = Component()
-        component = self.__builder.getComponentType()
-        #name = self.__builder.getName()
-        component.setName(name)
+        #self.__builder.getComponentType()
+        self.__builder.addName(name)
+        #component.setName(name)
 
-       # gateway = self.__builder.getGateway()
-        component.setGateway(gateway)
+        self.__builder.addGateway(gateway)
+       # component.setGateway(gateway)
 
-       # ipaddress = self.__builder.getIPAddress()
-        component.setIPAddress(ipaddress)
+        self.__builder.addIPAddress(ipaddress)
+       # component.setIPAddress(ipaddress)
 
-       # subnetmask = self.__builder.getSubnetMask()
-        component.setSubnetMask(subnetmask)
+        self.__builder.addSubnetMask(subnetmask)
+       # component.setSubnetMask(subnetmask)
 
-       # dnsserver = self.__builder.getDNSServer()
-        component.setDNSServer(dnsserver)
+        self.__builder.addDNSServer(dnsserver)
+       # component.setDNSServer(dnsserver)
 
-       # routes = self.__builder.getRoutes()
-        component.setRoutes(routes)
+        self.__builder.addRoutes(network, subnetmask, nexthop)
+       # component.setRoutes(routes)
 
-      #  fastethernet = self.__builder.getFastEthernet()
-        component.setFastEthernet(fastethernet)
+        self.__builder.addFastEthernet(mac, ipaddress, subnetmask)
+      #  component.setFastEthernet(fastethernet)
 
-        component.setFlyweight()
+      #  component.setFlyweight()
 
-        return component
+        return self.__builder.getComponent()
 
 # The whole product
 class Component:
@@ -117,6 +117,16 @@ class Router(Component):
     def setFlyweight(self):
     	self.__flyweight = flyweightFactory.get_flyweight('Router')
 
+    def getName(self):
+        return self.__name
+
+    def getRoutes(self):
+        return self.__routes
+
+    def getFastEthernet(self):
+        return self.__fastethernet
+
+
 class Hub(Component):
 
     def __init__(self):
@@ -124,6 +134,9 @@ class Hub(Component):
         self.__flyweight = None
     def setName(self, name):
         self.__name = name
+
+    def getName(self):
+        return self.__name
 
     def specification(self):
         print "name: %s" % self.__name
@@ -155,6 +168,21 @@ class PC(Component):
     def setIPAddress(self, ipaddress):
         self.__ipaddress = ipaddress
 
+    def getName(self):
+        return self.__name
+
+    def getGateway(self):
+        return self.__gateway
+        
+    def getSubnetMask(self):
+        return self.__subnetmask
+        
+    def getDNSServer(self):
+        return self.__dnsserver
+        
+    def getIPAddress(self):
+        return self.__ipaddress
+
     def specification(self):
         print "name: %s" % self.__name
         print "gateway: %s" % self.__gateway
@@ -173,113 +201,117 @@ class Builder:
     the parts for a vehicle.
     """
 
-    def getName(self): pass
+    def addName(self, arg_name): pass
     def getComponentType(self): pass
-    def getGateway(self): pass
-    def getIPAddress(self): pass
-    def getSubnetMask(self): pass
-    def getDNSServer(self): pass
-    def getRoutes(self): pass
-    def getFastEthernet(self): pass
-    def getFlyweight(self): pass
+    def addGateway(self, arg_gateway): pass
+    def addIPAddress(self, arg_ipaddress): pass
+    def addSubnetMask(self, arg_subnetmask): pass
+    def addDNSServer(self, arg_dnsserver): pass
+    def addRoutes(self, arg_network, arg_subnetmask, arg_nexthop): pass
+    def addFastEthernet(self, arg_mac, arg_ipaddress, arg_subnetmask): pass
+    def addFlyweight(self): pass
+    def getComponent(self): pass
 
 class HubBuilder(Builder):
 
     """ Concrete Builder implementation.
     This class builds parts for Jeep's SUVs.
     """
+    myhub = None
+    def __init__(self):
+        self.myhub = Hub()
     def getComponentType(self):
         return Hub()
 
-    def getName(self):
-        name = Name()
-        name.displayname = 'Hub A'
-        return name
+    def addName(self, arg_name):
+        self.myhub.setName(arg_name)
+    def getComponent(self):
+        return self.myhub
 
 class PCBuilder(Builder):
 
     """ Concrete Builder implementation.
     This class builds parts for Jeep's SUVs.
     """
+    myPC = None
+    def __init__(self):
+        self.myPC = PC()
     def getComponentType(self):
         return PC()
-    def getGateway(self):
-        gw = Gateway()
-        gw.gateway = 'gwaddr'
-        return gw
+    def addGateway(self, arg_gateway):
+        self.myPC.setGateway(arg_gateway)
 
-    def getIPAddress(self):
-        ip = IPAddress()
-        ip.ipaddress = 'ipaddr'
-        return ip
+    def addIPAddress(self, arg_ipaddress):
+        self.myPC.setIPAddress(arg_ipaddress)
 
-    def getSubnetMask(self):
-        subnet = SubnetMask()
-        subnet.subnetmask = 'smaddr'
-        return subnet
-    def getDNSServer(self):
-        dns = DNSServer()
-        dns.dnsserver = 'dnsaddr'
-        return dns
-    def getName(self):
-        name = Name()
-        name.displayname = 'PC A'
-        return name
+    def addSubnetMask(self, arg_subnetmask):
+        self.myPC.setSubnetMask(arg_subnetmask)
+    def addDNSServer(self, arg_dnsserver):
+        self.myPC.setDNSServer(arg_dnsserver)
+       # return dns
+    def addName(self,arg_name):
+        self.myPC.setName(arg_name)
+    def getComponent(self):
+        return self.myPC
 
 class RouterBuilder(Builder):
 
     """ Concrete Builder implementation.
     This class builds parts for Nissan's family cars.
     """
+    myrouter = None
+    def __init__(self):
+        self.myrouter = Router()
     def getComponentType(self):
         return Router()
 
-    def getName(self):
-        name = Name()
-        name.displayname = 'Router A'
-        return name
+    def addName(self, arg_name):
+        self.myrouter.setName(arg_name)
 
-    def getRoutes(self):
+    def addRoutes(self, arg_network, arg_subnetmask, arg_nexthop):
         num = 3 #make it user defined
-        routes = [Routes() for i in range(0,num)]
-        routes[0].network.network = 'nwaddr'
-        routes[0].mask.subnetmask = 'maskaddr'
-        routes[0].nexthop.gateway.ipaddress = 'nxthopaddr'
-        return routes #put network mask nexthop within it
-
-    def getFastEthernet(self):
+        temproutes = [Routes() for i in range(0,num)]
+        temproutes[0].network = arg_network
+        temproutes[0].mask = arg_subnetmask
+        temproutes[0].nexthop = arg_nexthop
+        self.myrouter.setRoutes(temproutes)
+        
+    def addFastEthernet(self, arg_mac, arg_ipaddress, arg_subnetmask):
 #4 ethernets, each has mac, ip address, subnet mask
-        fastEthernet = [FastEthernet() for i in range(0,4)]
-        fastEthernet[0].mac = "macaddr"
-        fastEthernet[0].iPaddress.ipaddress = "ipaddr"
-        fastEthernet[0].subneTmask.subnetmask = "smaddr"
-        return fastEthernet
+        tempfastEthernet = [FastEthernet() for i in range(0,4)]
+        tempfastEthernet[0].mac = arg_mac
+        tempfastEthernet[0].ipaddress = arg_ipaddress
+        tempfastEthernet[0].subnetmask = arg_subnetmask
+        self.myrouter.setFastEthernet(tempfastEthernet)
+    
+    def getComponent(self):
+        return self.myrouter
 
 # Car parts
-class IPAddress:
-    ipaddress = None
-class SubnetMask:
-    subnetmask = IPAddress()
-class Name:
-    displayname = None
+#class IPAddress:
+ #   ipaddress = None
+#class SubnetMask:
+ #   subnetmask = IPAddress()
 
-class Gateway:
-    gateway = IPAddress()
-class Network:
-    network = IPAddress()
+#class Gateway:
+ #   gateway = IPAddress()
+#class Network:
+ #   network = IPAddress()
+ #Fix this soduuuu
 class Routes:
-    network = Network()
-    mask = SubnetMask()
-    nexthop = Gateway()
-	zeroFrom = len(network.network.ipaddress)
-	while zeroFrom > 0:
-		if network.network.ipaddress[zeroFrom-1] == 0:
-			zeroFrom -= 1
+    network = None
+    mask = None
+    nexthop = None
+	#zeroFrom = len(network)
+	#while zeroFrom > 0:
+	#	if network[zeroFrom-1] == 0:
+	#		zeroFrom -= 1
 
 class FastEthernet:
     mac = None
-    iPaddress = IPAddress()
-    subneTmask = SubnetMask()
+    ipaddress = None
+    subnetmask = None
+
 class DNSServer:
     dnsserver = None
 class fourPartAddress:
@@ -295,21 +327,21 @@ def main():
 
     print "Router"
     director.setBuilder(routerBuilder)
-    router = director.getComponent(gateway='testgateway', name = 'testnamerouter')
+    router = director.createComponent(gateway='testgateway', name = 'testnamerouter')
     router.specification()
 
     print ""
 
     print "PC"
     director.setBuilder(pcBuilder)
-    pc = director.getComponent(name = 'testnamepc')
+    pc = director.createComponent(name = 'testnamepc')
     pc.specification()
 
     print ""
 
     print "Hub"
     director.setBuilder(hubBuilder)
-    hub = director.getComponent(name = 'testnamehub')
+    hub = director.createComponent(name = 'testnamehub')
     hub.specification()
 
 if __name__ == "__main__":
