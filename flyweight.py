@@ -1,7 +1,8 @@
 adjMat = {}
 '''
 Sample:
-adjMat=	{'byIp':
+adjMat=	{
+		'byIp':
 			{
 			 '1.1.1.1':obj1,
 			 '2.2.2.2':obj2
@@ -11,6 +12,12 @@ adjMat=	{'byIp':
 			 obj1:[obj3,obj4]
 			}
 		}
+
+extrinsic_state for each component sample:
+extrinsic_state =	{
+						'IP':IP of current obj (for PC)
+						'routingTable':list of routes (for router)
+					}
 '''
 
 currObjs = []
@@ -29,7 +36,7 @@ class FlyweightFactory:
     """
 
     def __init__(self):
-        self._flyweights = {}
+        self._flyweights = {'PC':PCFlyweight(),'Hub':HubFlyweight(),'Router':RouterFlyweight()}
 
     def get_flyweight(self, key):
         try:
@@ -47,7 +54,7 @@ class Flyweight(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def receive(self, extrinsic_state, ping):
 		'''
-		Ping is a dictionary for ping details, like {destinationIP:__, sourceIP:__, ...}
+		Ping is a dictionary for ping details, like {destinationIP:__, sourceIP:__, visitedObjs:[]...}
 		Similarly, extrinsic_state={IP:__, ...}
 		Return value: True for successful ping, False otherwise
 		'''
@@ -96,9 +103,19 @@ class RouterFlyweight(Flyweight):
 	def receive(self, extrinsic_state, ping): #pass, because router doesnt perform any processing based on the ping, as PC needs to
 		pass
 	def send(self, extrinsic_state, ping): #Returns object that router will forward the ping to, as a list
+		'''
 		portOfRouter = extrinsic_state['routingTable'][ping['destinationIP']]
 		IPofRouterPort = extrinsic_state['ports'][portOfRouter]
 		forwardToObj = adjMat['byIp'][IPofRouterPort]
+		'''
+		portOfRouter = -1
+		forwardToObj = None
+		routingTable = extrinsic_state['routingTable']
+		for route in routingTable:
+			if route.network.network.ipaddress[:route.zeroFrom] == ping['destinationIP'][:route.zeroFrom]
+				#to forward on this route
+				routerPortIp = route.nexthop.gateway.ipaddress
+				forwardToObj = adjMat['byIp'][routerPortIp]
 		return [forwardToObj]
 
 

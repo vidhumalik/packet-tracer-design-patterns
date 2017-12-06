@@ -1,3 +1,6 @@
+import flyweight
+
+flyweightFactory = FlyweightFactory()
 
 class Director:
     
@@ -37,6 +40,8 @@ class Director:
 
       #  fastethernet = self.__builder.getFastEthernet()
         component.setFastEthernet(fastethernet)
+
+        component.setFlyweight()
 
         return component
 
@@ -83,6 +88,8 @@ class Component:
         pass
     def specification(self):
         pass
+    def setFlyweight(self):
+    	pass
        # print "name: %s" % self.__name.displayname
         #print "gateway: %s" % self.__gateway.gateway
       #  print "engine horsepower: %d" % self.__engine.horsepower
@@ -93,6 +100,7 @@ class Router(Component):
         self.__name  = None
         self.__routes  = None
         self.__fastethernet  = None
+        self.__flyweight = None
     def specification(self):
         print "name: %s" % self.__name
         print "routes: %s" % self.__routes
@@ -105,15 +113,23 @@ class Router(Component):
 
     def setFastEthernet(self, fastethernet):
         self.__fastethernet = fastethernet
+
+    def setFlyweight(self):
+    	self.__flyweight = flyweightFactory.get_flyweight('Router')
+
 class Hub(Component):
 
     def __init__(self):
         self.__name  = None
+        self.__flyweight = None
     def setName(self, name):
         self.__name = name
 
     def specification(self):
         print "name: %s" % self.__name
+
+    def setFlyweight(self):
+    	self.__flyweight = flyweightFactory.get_flyweight('Hub')
         
 class PC(Component):
 
@@ -123,6 +139,7 @@ class PC(Component):
         self.__subnetmask  = None
         self.__dnsserver  = None
         self.__ipaddress  = None
+        self.__flyweight = None
     def setName(self, name):
         self.__name = name
 
@@ -134,7 +151,6 @@ class PC(Component):
         
     def setDNSServer(self, dnsserver):
         self.__dnsserver = dnsserver
-
         
     def setIPAddress(self, ipaddress):
         self.__ipaddress = ipaddress
@@ -145,6 +161,9 @@ class PC(Component):
         print "subnetmask: %s" % self.__subnetmask
         print "dnsserver: %s" % self.__dnsserver
         print "ipaddress: %s" % self.__ipaddress
+
+    def setFlyweight(self):
+    	self.__flyweight = flyweightFactory.get_flyweight('PC')
 
 
 class Builder:
@@ -162,6 +181,7 @@ class Builder:
     def getDNSServer(self): pass
     def getRoutes(self): pass
     def getFastEthernet(self): pass
+    def getFlyweight(self): pass
 
 class HubBuilder(Builder):
 
@@ -251,6 +271,10 @@ class Routes:
     network = Network()
     mask = SubnetMask()
     nexthop = Gateway()
+	zeroFrom = len(network.network.ipaddress)
+	while zeroFrom > 0:
+		if network.network.ipaddress[zeroFrom-1] == 0:
+			zeroFrom -= 1
 
 class FastEthernet:
     mac = None
