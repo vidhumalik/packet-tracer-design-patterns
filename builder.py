@@ -16,8 +16,8 @@ class Director:
         self.__builder = builder
 
     # The algorithm for assembling a car
-    def createComponent(self, name = None, gateway = None,ipaddress = None,subnetmask = None,dnsserver = None,network = None, nexthop = None, mac = None ):
-        print(name,gateway, ipaddress, subnetmask, dnsserver, network, nexthop, mac )
+    def createComponent(self, name = None, gateway = None,ipaddress = None,subnetmask = None,dnsserver = None, routes = None, fastethernet = None ):
+        print(name,gateway, ipaddress, subnetmask, dnsserver, routes, fastethernet)
         #component = Component()
         #self.__builder.getComponentType()
         self.__builder.addName(name)
@@ -35,10 +35,10 @@ class Director:
         self.__builder.addDNSServer(dnsserver)
        # component.setDNSServer(dnsserver)
 
-        self.__builder.addRoutes(network, subnetmask, nexthop)
+        self.__builder.addRoutes(routes)
        # component.setRoutes(routes)
 
-        self.__builder.addFastEthernet(mac, ipaddress, subnetmask)
+        self.__builder.addFastEthernet(fastethernet)
       #  component.setFastEthernet(fastethernet)
 
       #  component.setFlyweight()
@@ -207,8 +207,8 @@ class Builder:
     def addIPAddress(self, arg_ipaddress): pass
     def addSubnetMask(self, arg_subnetmask): pass
     def addDNSServer(self, arg_dnsserver): pass
-    def addRoutes(self, arg_network, arg_subnetmask, arg_nexthop): pass
-    def addFastEthernet(self, arg_mac, arg_ipaddress, arg_subnetmask): pass
+    def addRoutes(self, arg_routes): pass
+    def addFastEthernet(self, arg_fastethernet): pass
     def addFlyweight(self): pass
     def getComponent(self): pass
 
@@ -268,21 +268,12 @@ class RouterBuilder(Builder):
     def addName(self, arg_name):
         self.myrouter.setName(arg_name)
 
-    def addRoutes(self, arg_network, arg_subnetmask, arg_nexthop):
-        num = 3 #make it user defined
-        temproutes = [Routes() for i in range(0,num)]
-        temproutes[0].network = arg_network
-        temproutes[0].mask = arg_subnetmask
-        temproutes[0].nexthop = arg_nexthop
-        self.myrouter.setRoutes(temproutes)
+    def addRoutes(self, arg_routes):
+        self.myrouter.setRoutes(arg_routes)
         
-    def addFastEthernet(self, arg_mac, arg_ipaddress, arg_subnetmask):
+    def addFastEthernet(self, arg_fastethernet):
 #4 ethernets, each has mac, ip address, subnet mask
-        tempfastEthernet = [FastEthernet() for i in range(0,4)]
-        tempfastEthernet[0].mac = arg_mac
-        tempfastEthernet[0].ipaddress = arg_ipaddress
-        tempfastEthernet[0].subnetmask = arg_subnetmask
-        self.myrouter.setFastEthernet(tempfastEthernet)
+        self.myrouter.setFastEthernet(arg_fastethernet)
     
     def getComponent(self):
         return self.myrouter
@@ -319,28 +310,146 @@ class fourPartAddress:
 
 
 def main():
-    routerBuilder = RouterBuilder()
-    pcBuilder = PCBuilder()
-    hubBuilder = HubBuilder()
-
     director = Director()
+    tostop = 0
+    isfirst=1
+    adjMat = {}
+    adjMat["byName"] = {}
+    adjMat["byObj"] = {}
+    while(not tostop):
+        if(isfirst):
+            print("Choose to add one of the following components:")
+            isfirst = 0
+        else:
+            print("Make a choice:")
+            choice1=int(raw_input("1. Add a new component \n2. Change an existing component \n3. Setting Up of network is done \n"))
+            if(choice1 == 1):
+                print("Which component do you want to add:")
+                choice2=int(raw_input("1. PC \n2. Hub \n3. Router\n"))
+                if(choice2 == 1):
+                    print("Enter the following details:")
+                    name = raw_input("Enter Name: ")
+                    ipaddress = raw_input("Enter Ip Address: ")
+                    subnetmask = raw_input("Enter Subnet Mask: ")
+                    gateway = raw_input("Enter Gateway: ")
+                    dnsserver = raw_input("Enter DNS Server: ")
+                    director.setBuilder(PCBuilder())
+                    pc = director.createComponent(name = name, ipaddress = ipaddress, subnetmask = subnetmask, gateway = gateway, dnsserver = dnsserver)
+                    adjMat["byName"][name] = pc
+                    print("The current list of objects that exists is as follows:")
+                    print(list(adjMat["byName"].keys()))
+                    print("enter the names of objects that this given PC connects to. To stop entering links, enter 0")
+                    
+                    linkChoice = raw_input()
+                    while(int(linkChoice)):
+                        linkChoice = raw_input()
+                        #ensure that linkchoice is valid
+                        adjMat['byObj'][pc].append(adjMat["byName"][linkChoice])
+                        #do the reverse also
+                        # as of now its name. need to add functionality to retrieve objs based on name
+                            #invalid link.
+                    pc.specification()
+
+                elif(choice2 == 2):
+                    print("Enter the following details:")
+                    name = raw_input("Enter Name: ")
+                    director.setBuilder(HubBuilder())
+                    hub = director.createComponent(name = name)
+                    adjMat["byName"][name] = hub
+                    print("The current list of objects that exists is as follows:")
+                    print(list(adjMat["byName"].keys()))
+                    print("enter the names of objects that this given PC connects to. To stop entering links, enter 0")
+                    linkChoice = raw_input()
+                    while(int(linkChoice)):
+                        linkChoice = raw_input()
+                        #ensure that linkchoice is valid
+                        adjMat['byObj'][hub].append(adjMat["byName"][linkChoice])
+                        #do the reverse also
+                        # as of now its name. need to add functionality to retrieve objs based on name
+                       
+                            #invalid link.
+                    hub.specification()
+                elif(choice2 == 3):
+                    print("Enter the following details:")
+                    name = raw_input("Enter Name: ")
+                    print("Enter the details pertaining to the ethernet ports. Maximum number of ports in a router is 4")
+                    count= 2
+                    tostop2 = 0
+                    fastethernet =[]
+                    temp = {}
+                    temp["mac"] = raw_input("Enter mac address: ")
+                    temp["ipaddress"] = raw_input("Enter ip address: ")
+                    temp["subnetmask"] = raw_input("Enter subnet mask: ")
+                    fastethernet.append(temp)
+                    while(count <= 4 and not tostop2):
+                        choice3 = int(raw_input("Details for port"+count+": press any key to continue or press 0 to stop"))
+                        if(choice3):
+                            temp = {}
+                            temp["mac"] = raw_input("Enter mac address: ")
+                            temp["ipaddress"] = raw_input("Enter ip address: ")
+                            temp["subnetmask"] = raw_input("Enter subnet mask: ")
+                            fastethernet.append(temp)
+                        else:
+                            tostop2 = 1
+                        count += 1
+                    print("Enter the details pertaining to the Routing Table Entries")
+                    tostop3 = 0
+                    routes =[]
+                    while(not tostop):
+                        choice4= int(raw_input("Enter any number to continue addition to routing table. Enter 0 to stop the adding of routing number entries:"))
+                        if(choice4):
+                            temp = {}
+                            temp["network"] = raw_input("Enter network address: ")
+                            temp["mask"] = raw_input("Enter subnet mask: ")
+                            temp["nexthop"] = raw_input("Enter next hop: ")
+                            routes.append(temp)
+                        else:
+                            tostop3 = 1
+                    director.setBuilder(RouterBuilder())
+                    router = director.createComponent(name = name, fastethernet = fastethernet, routes = routes)
+                    adjMat["byName"][name] = router
+                    print("The current list of objects that exists is as follows:")
+                    print(list(adjMat["byName"].keys()))
+                    print("enter the names of objects that this given PC connects to. To stop entering links, enter 0")
+                    linkChoice = raw_input()
+                    while(int(linkChoice)):
+                        linkChoice = raw_input()
+                        #ensure that linkchoice is valid
+                        adjMat['byObj'][router].append(adjMat["byName"][linkChoice])
+                        #do the reverse also
+                        # as of now its name. need to add functionality to retrieve objs based on name
+                        
+                            #invalid link.
+                    router.specification()
+
+                else:
+                    continue
+            elif(choice1 == 2):
+                pass
+
+            elif(choice1 == 3):
+                tostop = 1
+            else:
+                continue
+
+
 
     print "Router"
-    director.setBuilder(routerBuilder)
+    director.setBuilder(RouterBuilder())
     router = director.createComponent(gateway='testgateway', name = 'testnamerouter')
     router.specification()
 
     print ""
 
     print "PC"
-    director.setBuilder(pcBuilder)
+    director.setBuilder(PCBuilder())
     pc = director.createComponent(name = 'testnamepc')
     pc.specification()
 
     print ""
 
     print "Hub"
-    director.setBuilder(hubBuilder)
+    director.setBuilder(HubBuilder())
     hub = director.createComponent(name = 'testnamehub')
     hub.specification()
 

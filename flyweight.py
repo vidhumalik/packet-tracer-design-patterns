@@ -1,5 +1,6 @@
 adjMat = {}
 '''
+changing the key of by ip to name
 Sample:
 adjMat=	{
 		'byIp':
