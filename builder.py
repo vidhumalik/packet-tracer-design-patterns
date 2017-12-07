@@ -24,24 +24,24 @@ class Director:
         #component.setName(name)
 
         self.__builder.addGateway(gateway)
-       # component.setGateway(gateway)
+        #component.setGateway(gateway)
 
         self.__builder.addIPAddress(ipaddress)
-       # component.setIPAddress(ipaddress)
+        #component.setIPAddress(ipaddress)
 
         self.__builder.addSubnetMask(subnetmask)
-       # component.setSubnetMask(subnetmask)
+        #component.setSubnetMask(subnetmask)
 
         self.__builder.addDNSServer(dnsserver)
-       # component.setDNSServer(dnsserver)
+        #component.setDNSServer(dnsserver)
 
         self.__builder.addRoutes(routes)
-       # component.setRoutes(routes)
+        #component.setRoutes(routes)
 
         self.__builder.addFastEthernet(fastethernet)
-      #  component.setFastEthernet(fastethernet)
+        #component.setFastEthernet(fastethernet)
 
-      #  component.setFlyweight()
+        #component.setFlyweight()
 
         return self.__builder.getComponent()
 
@@ -56,29 +56,29 @@ class Component:
 
     def __init__(self):
         pass
-    #    self.__name  = None
-     #   self.__gateway  = None
-      #  self.__subnetmask  = None
-       # self.__dnsserver  = None
-    #    self.__routes  = None
-     #   self.__ipaddress  = None
-      #  self.__fastethernet  = None
+        #self.__name  = None
+        #self.__gateway  = None
+        #self.__subnetmask  = None
+        #self.__dnsserver  = None
+        #self.__routes  = None
+        #self.__ipaddress  = None
+        #self.__fastethernet  = None
 
     def setName(self, name):
-   #     self.__name = name
+        #self.__name = name
         pass
 
     def setGateway(self, gateway):
-    #    self.__gateway = gateway
+        #self.__gateway = gateway
         pass
     def setSubnetMask(self, subnetmask):
-     #   self.__subnetmask = subnetmask
+        #self.__subnetmask = subnetmask
         pass
     def setDNSServer(self, dnsserver):
-      #  self.__dnsserver = dnsserver
+        #self.__dnsserver = dnsserver
         pass
     def setRoutes(self, routes):
-       # self.__routes = routes
+        #self.__routes = routes
         pass
     def setIPAddress(self, ipaddress):
         #self.__ipaddress = ipaddress
@@ -90,10 +90,13 @@ class Component:
         pass
     def setFlyweight(self):
     	pass
-       # print "name: %s" % self.__name.displayname
+        #print "name: %s" % self.__name.displayname
         #print "gateway: %s" % self.__gateway.gateway
-      #  print "engine horsepower: %d" % self.__engine.horsepower
-       # print "tire size: %d\'" % self.__wheels[0].size
+        #print "engine horsepower: %d" % self.__engine.horsepower
+        #print "tire size: %d\'" % self.__wheels[0].size
+    def getType(self):
+        pass
+
 class Router(Component):
 
     def __init__(self):
@@ -126,6 +129,9 @@ class Router(Component):
     def getFastEthernet(self):
         return self.__fastethernet
 
+    def getType(self):
+        return 'Router'
+
 
 class Hub(Component):
 
@@ -143,6 +149,9 @@ class Hub(Component):
 
     def setFlyweight(self):
     	self.__flyweight = flyweightFactory.get_flyweight('Hub')
+
+    def getType(self):
+        return 'Hub'
         
 class PC(Component):
 
@@ -192,6 +201,9 @@ class PC(Component):
 
     def setFlyweight(self):
     	self.__flyweight = flyweightFactory.get_flyweight('PC')
+
+    def getType(self):
+        return 'PC'
 
 
 class Builder:
@@ -288,7 +300,9 @@ class RouterBuilder(Builder):
  #   gateway = IPAddress()
 #class Network:
  #   network = IPAddress()
- #Fix this soduuuu
+ 
+
+#Fix this soduuuu
 class Routes:
     network = None
     mask = None
@@ -316,6 +330,7 @@ def main():
     adjMat = {}
     adjMat["byName"] = {}
     adjMat["byObj"] = {}
+    adjMat['byIp'] = {}
     while(not tostop):
         if(isfirst):
             print("Choose to add one of the following components:")
@@ -338,16 +353,33 @@ def main():
                     adjMat["byName"][name] = pc
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
-                    print("enter the names of objects that this given PC connects to. To stop entering links, enter 0")
+                    print("Enter the names of objects that this given PC connects to. To stop entering links, enter 0")
                     
                     linkChoice = raw_input()
-                    while(int(linkChoice)):
-                        linkChoice = raw_input()
+                    while(linkChoice != '0'):
                         #ensure that linkchoice is valid
-                        adjMat['byObj'][pc].append(adjMat["byName"][linkChoice])
-                        #do the reverse also
-                        # as of now its name. need to add functionality to retrieve objs based on name
-                            #invalid link.
+                        tempObj = adjMat["byName"][linkChoice]
+                        if pc in adjMat['byObj']:
+                            adjMat['byObj'][pc].append(tempObj)
+                        else:
+                            adjMat['byObj'][pc] = [tempObj]
+                        if tempObj in adjMat['byObj']:
+                            adjMat['byObj'][tempObj].append(pc)
+                        else:
+                            adjMat['byObj'][tempObj] = [pc]
+                        
+                        #Taking care of adjMat['byIp']
+                        adjMat['byIp'][pc.getIPAddress()] = tempObj
+                        tempObjType = tempObj.getType()
+                        if tempObjType == 'PC':
+                            adjMat['byIp'][tempObj.getIPAddress()] = pc
+                        elif tempObjType == 'Router':
+                            portNum = int(raw_input('Enter port number of router to connect to: '))
+                            ipOfRouter = tempObj.getFastEthernet()[portNum-1]['ipaddress']
+                            adjMat['byIp'][ipOfRouter] = pc
+
+                        #invalid link check
+                        linkChoice = raw_input()
                     pc.specification()
 
                 elif(choice2 == 2):
@@ -358,46 +390,66 @@ def main():
                     adjMat["byName"][name] = hub
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
-                    print("enter the names of objects that this given PC connects to. To stop entering links, enter 0")
+                    print(adjMat['byName'])
+                    print("Enter the names of objects that this given Hub connects to. To stop entering links, enter 0")
                     linkChoice = raw_input()
-                    while(int(linkChoice)):
-                        linkChoice = raw_input()
+                    while(linkChoice != '0'):
                         #ensure that linkchoice is valid
-                        adjMat['byObj'][hub].append(adjMat["byName"][linkChoice])
-                        #do the reverse also
-                        # as of now its name. need to add functionality to retrieve objs based on name
-                       
-                            #invalid link.
+                        tempObj = adjMat["byName"][linkChoice]
+                        if hub in adjMat['byObj']:
+                            adjMat['byObj'][hub].append(tempObj)
+                        else:
+                            adjMat['byObj'][hub] = [tempObj]
+                        if tempObj in adjMat['byObj']:
+                            adjMat['byObj'][tempObj].append(hub)
+                        else:
+                            adjMat['byObj'][tempObj] = [hub]
+
+                        #Taking care of adjMat['byIp']
+                        tempObjType = tempObj.getType()
+                        if tempObjType == 'PC':
+                            adjMat['byIp'][tempObj.getIPAddress()] = hub
+                        elif tempObjType == 'Router':
+                            portNum = int(raw_input('Enter port number of router to connect to: '))
+                            ipOfRouter = tempObj.getFastEthernet()[portNum-1]['ipaddress']
+                            adjMat['byIp'][ipOfRouter] = hub
+
+                        #invalid link check
+                        linkChoice = raw_input()
                     hub.specification()
                 elif(choice2 == 3):
                     print("Enter the following details:")
                     name = raw_input("Enter Name: ")
                     print("Enter the details pertaining to the ethernet ports. Maximum number of ports in a router is 4")
-                    count= 2
+                    count= 1
                     tostop2 = 0
                     fastethernet =[]
                     temp = {}
+                    '''
                     temp["mac"] = raw_input("Enter mac address: ")
                     temp["ipaddress"] = raw_input("Enter ip address: ")
                     temp["subnetmask"] = raw_input("Enter subnet mask: ")
                     fastethernet.append(temp)
+                    '''
                     while(count <= 4 and not tostop2):
-                        choice3 = int(raw_input("Details for port"+count+": press any key to continue or press 0 to stop"))
-                        if(choice3):
+                        choice3 = raw_input("Details for port"+str(count)+"\nPress any key to continue, or press 0 to skip setup of this port: ")
+                        if(choice3 != '0'):
                             temp = {}
                             temp["mac"] = raw_input("Enter mac address: ")
                             temp["ipaddress"] = raw_input("Enter ip address: ")
                             temp["subnetmask"] = raw_input("Enter subnet mask: ")
                             fastethernet.append(temp)
+                            '''
                         else:
                             tostop2 = 1
+                            '''
                         count += 1
                     print("Enter the details pertaining to the Routing Table Entries")
                     tostop3 = 0
                     routes =[]
-                    while(not tostop):
-                        choice4= int(raw_input("Enter any number to continue addition to routing table. Enter 0 to stop the adding of routing number entries:"))
-                        if(choice4):
+                    while(not tostop3):
+                        choice4= raw_input("Press any key to add to routing table. Enter 0 to stop adding routing table entries:")
+                        if(choice4 != '0'):
                             temp = {}
                             temp["network"] = raw_input("Enter network address: ")
                             temp["mask"] = raw_input("Enter subnet mask: ")
@@ -410,16 +462,35 @@ def main():
                     adjMat["byName"][name] = router
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
-                    print("enter the names of objects that this given PC connects to. To stop entering links, enter 0")
+                    print("Press any key to add a router link. To stop entering links, enter 0")
                     linkChoice = raw_input()
-                    while(int(linkChoice)):
-                        linkChoice = raw_input()
+                    while(linkChoice != '0'):
                         #ensure that linkchoice is valid
-                        adjMat['byObj'][router].append(adjMat["byName"][linkChoice])
-                        #do the reverse also
-                        # as of now its name. need to add functionality to retrieve objs based on name
-                        
-                            #invalid link.
+                        linkChoice = raw_input('Enter name of object to connect to: ')
+                        portNum1 = int(raw_input('Enter port number of router to connect to: '))
+                        tempObj = adjMat["byName"][linkChoice]
+                        if router in adjMat['byObj']:
+                            adjMat['byObj'][router].append(tempObj)
+                        else:
+                            adjMat['byObj'][router] = [tempObj]
+                        if tempObj in adjMat['byObj']:
+                            adjMat['byObj'][tempObj].append(router)
+                        else:
+                            adjMat['byObj'][tempObj] = [router]
+
+                        #Taking care of adjMat['byIp']
+                        print(router.getFastEthernet())
+                        adjMat['byIp'][router.getFastEthernet()[portNum1-1]['ipaddress']] = tempObj
+                        tempObjType = tempObj.getType()
+                        if tempObjType == 'PC':
+                            adjMat['byIp'][tempObj.getIPAddress()] = router
+                        elif tempObjType == 'Router':
+                            portNum = int(raw_input('Enter port number of router to connect to: '))
+                            ipOfRouter = tempObj.getFastEthernet()[portNum-1]['ipaddress']
+                            adjMat['byIp'][ipOfRouter] = router
+
+                        #invalid link check
+                        linkChoice = raw_input()
                     router.specification()
 
                 else:
@@ -429,6 +500,7 @@ def main():
 
             elif(choice1 == 3):
                 tostop = 1
+                print(adjMat)
             else:
                 continue
 
