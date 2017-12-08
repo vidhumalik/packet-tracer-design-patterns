@@ -477,6 +477,7 @@ def inputIp(toEnter):
     str1 = 'Please enter '+toEnter+': '
     str2 = 'Invalid entry. Please re-enter '+toEnter+': '
     inp = raw_input(str1)
+    ret = ''
     while True:
         checker = inp.split('.')
         valid = True
@@ -487,7 +488,11 @@ def inputIp(toEnter):
                 valid = False
         if valid == True:
             IPList.append(inp)
-            return inp
+            for i in checker:
+                str3 = '0'*(3-len(i)) + i
+                ret += str3 + '.'
+            ret = ret[:-1]
+            return ret
         inp = raw_input(str2)
 
 def inputIpForRoutingTable(toEnter):
@@ -495,6 +500,7 @@ def inputIpForRoutingTable(toEnter):
     str1 = 'Please enter '+toEnter+': '
     str2 = 'Invalid entry. Please re-enter '+toEnter+': '
     inp = raw_input(str1)
+    ret = ''
     while True:
         checker = inp.split('.')
         valid = True
@@ -504,7 +510,11 @@ def inputIpForRoutingTable(toEnter):
             if len(i)==0 or int(i)<0 or int(i)>255:
                 valid = False
         if valid == True:
-            return inp
+            for i in checker:
+                str3 = '0'*(3-len(i)) + i
+                ret += str3 + '.'
+            ret = ret[:-1]
+            return ret
         inp = raw_input(str2)
 
 def inputIpExisting(toEnter):
@@ -512,6 +522,7 @@ def inputIpExisting(toEnter):
     str1 = 'Please enter '+toEnter+': '
     str2 = 'Invalid entry. Please re-enter '+toEnter+': '
     inp = raw_input(str1)
+    ret = ''
     while True:
         checker = inp.split('.')
         valid = True
@@ -521,7 +532,11 @@ def inputIpExisting(toEnter):
             if len(i)==0 or int(i)<0 or int(i)>255:
                 valid = False
         if valid == True:
-            return inp
+            for i in checker:
+                str3 = '0'*(3-len(i)) + i
+                ret += str3 + '.'
+            ret = ret[:-1]
+            return ret
         inp = raw_input(str2)
 
 def inputName():
