@@ -14,7 +14,7 @@ def main():
             isfirst = 0
         else:
             print("Make a choice:")
-            choice1=int(raw_input("1. Add a new component \n2. Change an existing component \n3. Setting Up of network is done \n"))
+            choice1=int(raw_input("1. Add a new component \n2. Setting Up of network is done \n"))
             if(choice1 == 1):
                 print("Which component do you want to add:")
                 choice2=int(raw_input("1. PC \n2. Hub \n3. Router\n"))
@@ -29,7 +29,7 @@ def main():
                     dnsserver = None
                     director.setBuilder(PCBuilder())
                     pc = director.createComponent(name = name, ipaddress = ipaddress, subnetmask = subnetmask, gateway = gateway, dnsserver = dnsserver)
-                    adjMat["byName"][name] = pc
+                    #adjMat["byName"][name] = pc
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
                     print("Enter the name of object that this given PC connects to. To not enter a link, enter 0")
@@ -37,7 +37,7 @@ def main():
                     linkChoice = checkName('') #raw_i()
                     if(linkChoice != '0'):
                         #ensure that linkchoice is valid
-
+                        director.createLink(linkChoice)
                         tempObj = adjMat["byName"][linkChoice]
                         if pc in adjMat['byObj']:
                             adjMat['byObj'][pc].append(tempObj)
@@ -67,7 +67,7 @@ def main():
                     name = inputName() #raw_input("Enter Name: ")
                     director.setBuilder(HubBuilder())
                     hub = director.createComponent(name = name)
-                    adjMat["byName"][name] = hub
+                    #adjMat["byName"][name] = hub
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
                     print("Enter the names of objects that this given Hub connects to. To stop entering links, enter 0")
@@ -146,7 +146,7 @@ def main():
                     #print(routes)
                     director.setBuilder(RouterBuilder())
                     router = director.createComponent(name = name, fastethernet = fastethernet, routes = routes)
-                    adjMat["byName"][name] = router
+                    #adjMat["byName"][name] = router
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
                     print("Press any key to add a router link. To stop entering links, enter 0")
@@ -183,10 +183,6 @@ def main():
                 else:
                     continue
             elif(choice1 == 2):
-                component_to_change = raw_input("Enter the name of the component that you need to edit")
-                pass
-
-            elif(choice1 == 3):
                 tostop = 1
                 print(adjMat)
             else:
@@ -230,6 +226,8 @@ def main():
                 pingInTransit = False
             else:
                 currentObjs = newList
+
+
 
 if __name__ == "__main__":
     main()
