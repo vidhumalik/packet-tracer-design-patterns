@@ -1,4 +1,5 @@
 from builder import *
+from pathTree import *
 
 def main():
     director = Director()
@@ -8,6 +9,7 @@ def main():
     adjMat["byName"] = {}
     adjMat["byObj"] = {}
     adjMat['byIp'] = {}
+    PCListByIp = {}
     while(not tostop):
         if(isfirst):
             print("Choose to add one of the following components:")
@@ -24,7 +26,7 @@ def main():
                     ipaddress = inputIp('IP address')
                     #subnetmask = raw_input("Enter Subnet Mask: ") #inputIp('subnet mask')
                     subnetmask = None
-                    gateway = inputIp("Enter Gateway: ") #inputIp('gateway')
+                    gateway = raw_input("Enter gateway: ") #inputIpForRoutingTable("Enter Gateway: ")
                   #  dnsserver = raw_input("Enter DNS Server: ") #inputIp('DNS server')
                     dnsserver = None
                     director.setBuilder(PCBuilder())
@@ -32,12 +34,14 @@ def main():
                     #adjMat["byName"][name] = pc
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
+                    PCListByIp[ipaddress] = pc
                     print("Enter the name of object that this given PC connects to. To not enter a link, enter 0")
                     print(pc)
                     linkChoice = checkName('') #raw_i()
                     if(linkChoice != '0'):
                         #ensure that linkchoice is valid
-                        director.createLink(linkChoice)
+                        print('linkChoice: '+str(linkChoice))
+                        #director.createLink(linkChoice)
                         tempObj = adjMat["byName"][linkChoice]
                         if pc in adjMat['byObj']:
                             adjMat['byObj'][pc].append(tempObj)
@@ -116,7 +120,7 @@ def main():
                             temp = {}
                             temp["mac"] = raw_input("Enter mac address: ")
                             temp["ipaddress"] = inputIp('network address') #raw_input("Enter ip address: ")
-                            temp["subnetmask"] = None#inputIp('subnet mask')
+                            temp["subnetmask"] = None #inputIp('subnet mask')
                             fastethernet.append(temp)
                             '''
                         else:
@@ -189,6 +193,9 @@ def main():
                 continue
 
     #print('out of loop')
+
+    print(PCListByIp)
+    '''
     while True:
         print('\n\n\n\nPing trial:')
         src = inputIpExisting('source IP address') #raw_input('Enter source IP: ')
@@ -203,12 +210,7 @@ def main():
         pingInTransit = True
         while pingInTransit:
             newList = []
-            #print(currentObjs)
             for device in currentObjs:
-                '''
-                if device == None:
-                    continue
-                '''
                 if device.receive(ping) == True:
                     print('Successful ping')
                     ping['status'] = True
@@ -226,6 +228,59 @@ def main():
                 pingInTransit = False
             else:
                 currentObjs = newList
+    '''
+
+    #pingTraverseTree = None
+
+    def printTree(treeRoot):
+        children = treeRoot.getChildren()
+        print('('+str(treeRoot.getCurrNode().getName())+','+str(treeRoot)+' : '+str(children))
+        for i in children:
+            printTree(i)
+
+
+    def pingTraverse(ping, rootTree):
+        curr = rootTree.getCurrNode()
+        ping['visitedObjs'].append(curr)
+        childList = curr.send(ping, adjMat)
+        print(childList)
+        for i in childList:
+            if i in ping['visitedObjs']:
+                continue
+            child = pathNode(i, curr)
+            rootTree.addChild(child)
+            print(str(rootTree.getCurrNode().getName()))
+            print(' : ')
+            print(str(i.getName()))
+            raw_input('')
+            if i.receive(ping) == True:
+                return True
+            currResult = pingTraverse(ping, child)
+            if currResult == True:
+                return True
+
+
+
+
+    while True:
+        print('\n\n\n\nPing trial:')
+        src = inputIpExisting('source IP address') #raw_input('Enter source IP: ')
+        dst = inputIpExisting('destination IP address') #raw_input('Enter destination IP: ')
+        ping = {'sourceIP':src,'destinationIP':dst,'visitedObjs':[]}
+        if src not in adjMat['byIp'] or dst not in adjMat['byIp']:
+            print('Failed ping')
+            continue
+        currentObjs = [adjMat['byIp'][src]]
+        pingTraverseTree = pathNode(PCListByIp[src],None)
+        #pingTraverseTree.addChildren(currentObjs)
+        resultTree = pingTraverse(ping, pingTraverseTree)
+        if resultTree == True:
+            print('Successful ping')
+        else:
+            print('Ping failed')
+        printTree(pingTraverseTree)
+        
+
 
 
 

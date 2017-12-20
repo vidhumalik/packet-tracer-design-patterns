@@ -63,7 +63,7 @@ class PCFlyweight(Flyweight):
             return True
         return False
     def send(self, extrinsic_state, ping):
-        forwardToObj = adjMat['byIp'][extrinsic_state['IP']]
+        forwardToObj = extrinsic_state['adjMat']['byIp'][extrinsic_state['IP']]
         return [forwardToObj]
 
 class HubFlyweight(Flyweight):
@@ -75,7 +75,7 @@ class HubFlyweight(Flyweight):
         print(self)
         print('-----')
         '''
-        forwardToObjList = adjMat['byObj'][extrinsic_state['Hub']]
+        forwardToObjList = extrinsic_state['adjMat']['byObj'][extrinsic_state['Hub']]
         return forwardToObjList
 
 class RouterFlyweight(Flyweight):
@@ -102,7 +102,7 @@ class RouterFlyweight(Flyweight):
             if route['network'][:route['zeroFrom']] == ping['destinationIP'][:route['zeroFrom']]:
                 #to forward on this route
                 #routerPortIp = route.nexthop.gateway.ipaddress
-                forwardToObj = adjMat['byIp'][route['nexthop']]
+                forwardToObj = extrinsic_state['adjMat']['byIp'][route['nexthop']]
                 break
         return [forwardToObj]
 

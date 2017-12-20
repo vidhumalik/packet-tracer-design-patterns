@@ -104,7 +104,7 @@ class Component:
         #print "tire size: %d\'" % self.__wheels[0].size
     def getType(self):
         pass
-    def send(self,ping):
+    def send(self,ping, adjMatrix):
         pass
     def receive(self,ping):
         pass
@@ -144,8 +144,8 @@ class Router(Component):
     def getType(self):
         return 'Router'
 
-    def send(self,ping):
-        return self.__flyweight.send({'routingTable':self.getRoutes()}, ping)
+    def send(self,ping, adjMatrix):
+        return self.__flyweight.send({'routingTable':self.getRoutes(),'adjMat':adjMatrix}, ping)
 
     def receive(self,ping):
         return self.__flyweight.receive({'routingTable':self.getRoutes()}, ping)
@@ -170,8 +170,8 @@ class Hub(Component):
     def getType(self):
         return 'Hub'
 
-    def send(self,ping):
-        return self.__flyweight.send({'Hub':self}, ping)
+    def send(self,ping, adjMatrix):
+        return self.__flyweight.send({'Hub':self,'adjMat':adjMatrix}, ping)
 
     def receive(self,ping):
         return self.__flyweight.receive({'Hub':self}, ping)
@@ -228,8 +228,8 @@ class PC(Component):
     def getType(self):
         return 'PC'
 
-    def send(self,ping):
-        return self.__flyweight.send({'IP':self.getIPAddress()}, ping)
+    def send(self, ping, adjMatrix):
+        return self.__flyweight.send({'IP':self.getIPAddress(),'adjMat':adjMatrix}, ping)
 
     def receive(self,ping):
         return self.__flyweight.receive({'IP':self.getIPAddress()}, ping)
@@ -365,21 +365,21 @@ def inputIp(toEnter):
     str1 = 'Please enter '+toEnter+': '
     str2 = 'Invalid entry. Please re-enter '+toEnter+': '
     inp = raw_input(str1)
-    ret = ''
     while True:
+        ret = ''
         checker = inp.split('.')
         valid = True
-        if len(checker) != 4 or inp in IPList:
+        for i in checker:
+            str3 = '0'*(3-len(i)) + i
+            ret += str3 + '.'
+        ret = ret[:-1]
+        if len(checker) != 4 or ret in IPList:
             valid = False
         for i in checker:
             if len(i)==0 or int(i)<0 or int(i)>255:
                 valid = False
         if valid == True:
-            IPList.append(inp)
-            for i in checker:
-                str3 = '0'*(3-len(i)) + i
-                ret += str3 + '.'
-            ret = ret[:-1]
+            IPList.append(ret)
             return ret
         inp = raw_input(str2)
 
@@ -410,20 +410,20 @@ def inputIpExisting(toEnter):
     str1 = 'Please enter '+toEnter+': '
     str2 = 'Invalid entry. Please re-enter '+toEnter+': '
     inp = raw_input(str1)
-    ret = ''
     while True:
+        ret = ''
         checker = inp.split('.')
         valid = True
-        if len(checker) != 4 or inp not in IPList:
+        for i in checker:
+            str3 = '0'*(3-len(i)) + i
+            ret += str3 + '.'
+        ret = ret[:-1]
+        if len(checker) != 4 or ret not in IPList:
             valid = False
         for i in checker:
             if len(i)==0 or int(i)<0 or int(i)>255:
                 valid = False
         if valid == True:
-            for i in checker:
-                str3 = '0'*(3-len(i)) + i
-                ret += str3 + '.'
-            ret = ret[:-1]
             return ret
         inp = raw_input(str2)
 
