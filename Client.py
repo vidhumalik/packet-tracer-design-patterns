@@ -1,5 +1,6 @@
-from builder import *
+from director import *
 from pathTree import *
+from inputProcessing import *
 
 def main():
     director = Director()
@@ -22,11 +23,11 @@ def main():
                 choice2=int(raw_input("1. PC \n2. Hub \n3. Router\n"))
                 if(choice2 == 1):
                     print("Enter the following details:")
-                    name = inputName() #raw_input("Enter Name: ")
-                    ipaddress = inputIp('IP address')
+                    name = inputName(adjMat) #raw_input("Enter Name: ")
+                    ipaddress = inputIp('IP address', adjMat, IPList)
                     #subnetmask = raw_input("Enter Subnet Mask: ") #inputIp('subnet mask')
                     subnetmask = None
-                    gateway = raw_input("Enter gateway: ") #inputIpForRoutingTable("Enter Gateway: ")
+                    gateway = inputIpForRoutingTable("Enter Gateway: ", adjMat, IPList) #raw_input("Enter gateway: ")
                   #  dnsserver = raw_input("Enter DNS Server: ") #inputIp('DNS server')
                     dnsserver = None
                     director.setBuilder(PCBuilder())
@@ -37,7 +38,7 @@ def main():
                     PCListByIp[ipaddress] = pc
                     print("Enter the name of object that this given PC connects to. To not enter a link, enter 0")
                     print(pc)
-                    linkChoice = checkName('') #raw_i()
+                    linkChoice = checkName('',adjMat) #raw_i()
                     if(linkChoice != '0'):
                         #ensure that linkchoice is valid
                         print('linkChoice: '+str(linkChoice))
@@ -68,14 +69,14 @@ def main():
 
                 elif(choice2 == 2):
                     print("Enter the following details:")
-                    name = inputName() #raw_input("Enter Name: ")
+                    name = inputName(adjMat) #raw_input("Enter Name: ")
                     director.setBuilder(HubBuilder())
                     hub = director.createComponent(name = name)
                     #adjMat["byName"][name] = hub
                     print("The current list of objects that exists is as follows:")
                     print(list(adjMat["byName"].keys()))
                     print("Enter the names of objects that this given Hub connects to. To stop entering links, enter 0")
-                    linkChoice = checkName('') #raw_input()
+                    linkChoice = checkName('', adjMat) #raw_input()
                     while(linkChoice != '0'):
                         #ensure that linkchoice is valid
                         tempObj = adjMat["byName"][linkChoice]
@@ -98,11 +99,11 @@ def main():
                             adjMat['byIp'][ipOfRouter] = hub
 
                         #invalid link check
-                        linkChoice = checkName('') #raw_input()
+                        linkChoice = checkName('', adjMat) #raw_input()
                     hub.specification()
                 elif(choice2 == 3):
                     print("Enter the following details:")
-                    name = inputName() #raw_input("Enter Name: ")
+                    name = inputName(adjMat) #raw_input("Enter Name: ")
                     print("Enter the details pertaining to the ethernet ports. Maximum number of ports in a router is 4")
                     count= 1
                     tostop2 = 0
@@ -119,7 +120,7 @@ def main():
                         if(choice3 != '0'):
                             temp = {}
                             temp["mac"] = raw_input("Enter mac address: ")
-                            temp["ipaddress"] = inputIp('network address') #raw_input("Enter ip address: ")
+                            temp["ipaddress"] = inputIp('network address',adjMat, IPList) #raw_input("Enter ip address: ")
                             temp["subnetmask"] = None #inputIp('subnet mask')
                             fastethernet.append(temp)
                             '''
@@ -134,9 +135,9 @@ def main():
                         choice4= raw_input("Press any key to add to routing table. Enter 0 to stop adding routing table entries:")
                         if(choice4 != '0'):
                             temp = {}
-                            temp["network"] = inputIpForRoutingTable('network address')
+                            temp["network"] = inputIpForRoutingTable('network address',adjMat, IPList)
                             temp["mask"] = None # raw_input("Enter subnet mask: ") #inputIp('subnet mask')
-                            temp["nexthop"] = inputIpExisting('next hop IP address')
+                            temp["nexthop"] = inputIpExisting('next hop IP address',adjMat, IPList)
                             zeroFrom = len(temp['network']) #should be 15, for format xxx.xxx.xxx.xxx
                             while zeroFrom > 0:
                                 if temp['network'][zeroFrom-1]=='0' or temp['network'][zeroFrom-1]=='.':
@@ -157,7 +158,7 @@ def main():
                     linkChoice = raw_input()
                     while(linkChoice != '0'):
                         #ensure that linkchoice is valid
-                        linkChoice = checkName('Enter name of object to connect to: ') #raw_input('Enter name of object to connect to: ')
+                        linkChoice = checkName('Enter name of object to connect to: ',adjMat) #raw_input('Enter name of object to connect to: ')
                         portNum1 = int(raw_input('Enter port number of router to connect to: '))
                         tempObj = adjMat["byName"][linkChoice]
                         if router in adjMat['byObj']:
@@ -230,8 +231,6 @@ def main():
                 currentObjs = newList
     '''
 
-    #pingTraverseTree = None
-
     def printTree(treeRoot):
         children = treeRoot.getChildren()
         print('('+str(treeRoot.getCurrNode().getName())+','+str(treeRoot)+' : '+str(children))
@@ -243,7 +242,7 @@ def main():
         curr = rootTree.getCurrNode()
         ping['visitedObjs'].append(curr)
         childList = curr.send(ping, adjMat)
-        print(childList)
+        #print(childList)
         for i in childList:
             if i in ping['visitedObjs']:
                 continue
@@ -259,16 +258,16 @@ def main():
             if currResult == True:
                 return True
 
-
-
-
     while True:
         print('\n\n\n\nPing trial:')
-        src = inputIpExisting('source IP address') #raw_input('Enter source IP: ')
-        dst = inputIpExisting('destination IP address') #raw_input('Enter destination IP: ')
+        src = inputIpExisting('source IP address', adjMat, IPList) #raw_input('Enter source IP: ')
+        dst = inputIpExisting('destination IP address', adjMat, IPList) #raw_input('Enter destination IP: ')
         ping = {'sourceIP':src,'destinationIP':dst,'visitedObjs':[]}
-        if src not in adjMat['byIp'] or dst not in adjMat['byIp']:
+        if src not in adjMat['byIp']:# or dst not in adjMat['byIp']:
             print('Failed ping')
+            continue
+        if src == dst:
+            print('Successful ping')
             continue
         currentObjs = [adjMat['byIp'][src]]
         pingTraverseTree = pathNode(PCListByIp[src],None)
@@ -278,7 +277,7 @@ def main():
             print('Successful ping')
         else:
             print('Ping failed')
-        printTree(pingTraverseTree)
+        #printTree(pingTraverseTree)
         
 
 
