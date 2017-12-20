@@ -56,13 +56,16 @@ class RouterFlyweight(Flyweight):
         pass
     def send(self, extrinsic_state, ping): #Returns object that router will forward the ping to, as a list
         portOfRouter = -1
-        forwardToObj = None
+        forwardToObj = []
         routingTable = extrinsic_state['routingTable']
         for route in routingTable:
             #if route.network.network.ipaddress[:route.zeroFrom] == ping['destinationIP'][:route.zeroFrom]:
             if route['network'][:route['zeroFrom']] == ping['destinationIP'][:route['zeroFrom']]:
                 #to forward on this route
                 #routerPortIp = route.nexthop.gateway.ipaddress
-                forwardToObj = extrinsic_state['adjMat']['byIp'][route['nexthop']]
+                forwardToObj.append(extrinsic_state['adjMat']['byIp'][route['nexthop']])
+                if route['nexthop'] in extrinsic_state['IPList']:
+                    forwardToObj.append(extrinsic_state['IPList'][route['nexthop']])
                 break
-        return [forwardToObj]
+        print('f'+str(forwardToObj))
+        return forwardToObj

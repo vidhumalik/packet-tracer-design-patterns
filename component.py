@@ -53,7 +53,7 @@ class Component:
         #print "tire size: %d\'" % self.__wheels[0].size
     def getType(self):
         pass
-    def send(self,ping, adjMatrix):
+    def send(self,ping, adjMatrix, IPList):
         pass
     def receive(self,ping):
         pass
@@ -93,8 +93,8 @@ class Router(Component):
     def getType(self):
         return 'Router'
 
-    def send(self,ping, adjMatrix):
-        return self.__flyweight.send({'routingTable':self.getRoutes(),'adjMat':adjMatrix}, ping)
+    def send(self,ping, adjMatrix, IPList):
+        return self.__flyweight.send({'routingTable':self.getRoutes(),'adjMat':adjMatrix, 'IPList':IPList}, ping)
 
     def receive(self,ping):
         return self.__flyweight.receive({'routingTable':self.getRoutes()}, ping)
@@ -119,8 +119,8 @@ class Hub(Component):
     def getType(self):
         return 'Hub'
 
-    def send(self,ping, adjMatrix):
-        return self.__flyweight.send({'Hub':self,'adjMat':adjMatrix}, ping)
+    def send(self,ping, adjMatrix, IPList):
+        return self.__flyweight.send({'Hub':self,'adjMat':adjMatrix, 'IPList':IPList}, ping)
 
     def receive(self,ping):
         return self.__flyweight.receive({'Hub':self}, ping)
@@ -177,8 +177,8 @@ class PC(Component):
     def getType(self):
         return 'PC'
 
-    def send(self, ping, adjMatrix):
-        return self.__flyweight.send({'IP':self.getIPAddress(),'adjMat':adjMatrix}, ping)
+    def send(self, ping, adjMatrix, IPList):
+        return self.__flyweight.send({'IP':self.getIPAddress(),'adjMat':adjMatrix, 'IPList':IPList}, ping)
 
     def receive(self,ping):
         return self.__flyweight.receive({'IP':self.getIPAddress()}, ping)
