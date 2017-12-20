@@ -119,7 +119,9 @@ def main():
     def pingTraverse(ping, rootTree):
         curr = rootTree.getCurrNode()
         ping['visitedObjs'].append(curr)
-        childList = curr.send(ping, adjMat)
+        print(curr)
+        childList = curr.send(ping, adjMat, PCListByIp)
+        print(childList)
         for i in childList:
             if i in ping['visitedObjs']:
                 continue
