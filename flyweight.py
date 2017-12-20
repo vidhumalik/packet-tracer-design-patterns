@@ -64,7 +64,8 @@ class RouterFlyweight(Flyweight):
                 #to forward on this route
                 #routerPortIp = route.nexthop.gateway.ipaddress
                 forwardToObj.append(extrinsic_state['adjMat']['byIp'][route['nexthop']])
-                forwardToObj.append(extrinsic_state['IPList'][route['nexthop']])
+                if route['nexthop'] in extrinsic_state['IPList']:
+                    forwardToObj.append(extrinsic_state['IPList'][route['nexthop']])
                 break
         print('f'+str(forwardToObj))
         return forwardToObj
