@@ -1,3 +1,8 @@
+
+adjMat = {}
+adjMat["byName"] = {}
+adjMat["byObj"] = {}
+adjMat['byIp'] = {}
 def inputIp(toEnter, adjMat, IPList):
     valid = True
     str1 = 'Please enter '+toEnter+': '
@@ -75,6 +80,7 @@ def inputName(adjMat):
 def checkName(msg, adjMat):
     inp = raw_input(msg)
     while True:
+        print adjMat['byName']
         if inp in adjMat['byName'] or inp=='0':
             return inp
         inp = raw_input('Object does not exist. Enter existing object name: ')

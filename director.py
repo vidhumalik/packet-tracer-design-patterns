@@ -1,7 +1,6 @@
 #import flyweight
 from builder import *
 currObjs = []
-adjMat = {}
 IPList = []
 
 class Director:
@@ -50,4 +49,5 @@ class Director:
         #component.setFlyweight()
         comp = self.__builder.getComponent()
         adjMat["byName"][name] = comp
+        print adjMat["byName"]
         return comp

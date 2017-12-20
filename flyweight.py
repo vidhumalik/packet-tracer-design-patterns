@@ -28,12 +28,7 @@ class PCFlyweight(Flyweight):
     Same for hub and router classes
     '''
     def receive(self, extrinsic_state, ping):
-        '''
-        print('In PC')
-        print(ping)
-        print(extrinsic_state)
-        print('-----')
-        '''
+        
         if extrinsic_state['IP'] == ping['destinationIP']:
             return True
         return False
@@ -45,11 +40,7 @@ class HubFlyweight(Flyweight):
     def receive(self, extrinsic_state, ping): #pass, because hub doesnt perform any processing based on the ping, as PC needs to
         pass
     def send(self, extrinsic_state, ping): #Returns list of objects that hub will forward the ping to
-        '''
-        print('in Hub')
-        print(self)
-        print('-----')
-        '''
+        
         forwardToObjList = extrinsic_state['adjMat']['byObj'][extrinsic_state['Hub']]
         return forwardToObjList
 
@@ -64,11 +55,6 @@ class RouterFlyweight(Flyweight):
     def receive(self, extrinsic_state, ping): #pass, because router doesnt perform any processing based on the ping, as PC needs to
         pass
     def send(self, extrinsic_state, ping): #Returns object that router will forward the ping to, as a list
-        '''
-        portOfRouter = extrinsic_state['routingTable'][ping['destinationIP']]
-        IPofRouterPort = extrinsic_state['ports'][portOfRouter]
-        forwardToObj = adjMat['byIp'][IPofRouterPort]
-        '''
         portOfRouter = -1
         forwardToObj = None
         routingTable = extrinsic_state['routingTable']

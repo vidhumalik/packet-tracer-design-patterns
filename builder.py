@@ -1,4 +1,5 @@
 from component import *
+from inputProcessing import *
 
 class Builder:
 
@@ -28,6 +29,31 @@ class HubBuilder(Builder):
     myhub = None
     def __init__(self):
         self.myhub = Hub()
+    def createLink(self, linkChoice):
+        while(linkChoice != '0'):
+            #ensure that linkchoice is valid
+            hub = self.myhub
+            tempObj = adjMat["byName"][linkChoice]
+            if hub in adjMat['byObj']:
+                adjMat['byObj'][hub].append(tempObj)
+            else:
+                adjMat['byObj'][hub] = [tempObj]
+            if tempObj in adjMat['byObj']:
+                adjMat['byObj'][tempObj].append(hub)
+            else:
+                adjMat['byObj'][tempObj] = [hub]
+
+            #Taking care of adjMat['byIp']
+            tempObjType = tempObj.getType()
+            if tempObjType == 'PC':
+                adjMat['byIp'][tempObj.getIPAddress()] = hub
+            elif tempObjType == 'Router':
+                portNum = int(raw_input('Enter port number of router to connect to: '))
+                ipOfRouter = tempObj.getFastEthernet()[portNum-1]['ipaddress']
+                adjMat['byIp'][ipOfRouter] = hub
+
+            #invalid link check
+            linkChoice = checkName('', adjMat) #raw_input()
     def getComponentType(self):
         return Hub()
 
@@ -46,6 +72,31 @@ class PCBuilder(Builder):
     myPC = None
     def __init__(self):
         self.myPC = PC()
+    def createLink(self, linkChoice):
+        if(linkChoice != '0'):
+            #ensure that linkchoice is valid
+            print('linkChoice: '+str(linkChoice))
+            pc = self.myPC
+            tempObj = adjMat["byName"][linkChoice]
+            if pc in adjMat['byObj']:
+                adjMat['byObj'][pc].append(tempObj)
+            else:
+                adjMat['byObj'][pc] = [tempObj]
+            if tempObj in adjMat['byObj']:
+                adjMat['byObj'][tempObj].append(pc)
+            else:
+                adjMat['byObj'][tempObj] = [pc]
+
+            #Taking care of adjMat['byIp']
+            adjMat['byIp'][pc.getIPAddress()] = tempObj
+            tempObjType = tempObj.getType()
+            if tempObjType == 'PC':
+                adjMat['byIp'][tempObj.getIPAddress()] = pc
+            elif tempObjType == 'Router':
+                portNum = int(raw_input('Enter port number of router to connect to: '))
+                ipOfRouter = tempObj.getFastEthernet()[portNum-1]['ipaddress']
+                adjMat['byIp'][ipOfRouter] = pc
+
     def getComponentType(self):
         return PC()
     def addGateway(self, arg_gateway):
@@ -74,6 +125,37 @@ class RouterBuilder(Builder):
     myrouter = None
     def __init__(self):
         self.myrouter = Router()
+    def createLink(self, linkChoice):
+        router = self.myrouter
+        while(linkChoice != '0'):
+            #ensure that linkchoice is valid
+            linkChoice = checkName('Enter name of object to connect to: ',adjMat) #raw_input('Enter name of object to connect to: ')
+            portNum1 = int(raw_input('Enter port number of router to connect to: '))
+            tempObj = adjMat["byName"][linkChoice]
+            if router in adjMat['byObj']:
+                adjMat['byObj'][router].append(tempObj)
+            else:
+                adjMat['byObj'][router] = [tempObj]
+            if tempObj in adjMat['byObj']:
+                adjMat['byObj'][tempObj].append(router)
+            else:
+                adjMat['byObj'][tempObj] = [router]
+
+            #Taking care of adjMat['byIp']
+            #print(router.getFastEthernet())
+            adjMat['byIp'][router.getFastEthernet()[portNum1-1]['ipaddress']] = tempObj
+            tempObjType = tempObj.getType()
+            if tempObjType == 'PC':
+                adjMat['byIp'][tempObj.getIPAddress()] = router
+            elif tempObjType == 'Router':
+                portNum = int(raw_input('Enter port number of router to connect to: '))
+                ipOfRouter = tempObj.getFastEthernet()[portNum-1]['ipaddress']
+                adjMat['byIp'][ipOfRouter] = router
+
+            #invalid link check
+            linkChoice = raw_input()
+        
+
     def getComponentType(self):
         return Router()
 
